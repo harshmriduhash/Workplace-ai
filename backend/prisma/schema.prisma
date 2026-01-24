@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users         User[]
+  agents        Agent[]
+  simulations   Simulation[]
+  deployments   Deployment[]
+  tasks         Task[]
+  governorRules GovernorRule[] @map("governor_rules")
+  auditLogs     AuditLog[]     @map("audit_logs")
+
+  @@map("orgs")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  orgId     Int      @map("org_id")
+  email     String   @unique @db.VarChar(255)
+  name      String?  @db.VarChar(255)
+  role      String   @default("viewer") @db.VarChar(50) // admin, editor, viewer
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+
+  @@index([orgId])
+  @@map("users")
+}
+
+model Agent {
+  id          Int      @id @default(autoincrement())
+  orgId       Int      @map("org_id")
+  name        String   @db.VarChar(255)
+  role        String   @db.VarChar(255)
+  description String?  @db.Text
+  tools       String?  @db.Text // JSON array as text
+  costPerTask Decimal? @map("cost_per_task") @db.Decimal(10, 2)
+  status      String   @default("inactive") @db.VarChar(50) // active, paused, archived
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization  Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  simulations   Simulation[]
+  deployments   Deployment[]
+  tasks         Task[]
+  governorRules GovernorRule[]
+
+  @@index([orgId])
+  @@index([orgId, status])
+  @@map("agents")
+}
+
+model Simulation {
+  id          Int      @id @default(autoincrement())
+  orgId       Int      @map("org_id")
+  agentId     Int      @map("agent_id")
+  status      String   @default("pending") @db.VarChar(50) // pending, running, completed, failed
+  accuracy    Decimal? @db.Decimal(5, 2) // 0-100
+  cost        Decimal? @db.Decimal(10, 2)
+  latency     Int? // milliseconds
+  failureRate Decimal? @map("failure_rate") @db.Decimal(5, 2) // 0-100
+  testResults Json?    @map("test_results") // JSONB
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([orgId, createdAt(sort: Desc)])
+  @@index([agentId])
+  @@map("simulations")
+}
+
+model Deployment {
+  id          Int      @id @default(autoincrement())
+  orgId       Int      @map("org_id")
+  agentId     Int      @map("agent_id")
+  environment String   @db.VarChar(50) // staging, production
+  status      String   @default("active") @db.VarChar(50) // active, paused, rolled_back
+  version     Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tasks        Task[]
+
+  @@index([orgId])
+  @@index([orgId, agentId])
+  @@map("deployments")
+}
+
+model Task {
+  id           Int      @id @default(autoincrement())
+  orgId        Int      @map("org_id")
+  deploymentId Int?     @map("deployment_id")
+  agentId      Int      @map("agent_id")
+  input        String   @db.Text
+  output       String?  @db.Text
+  cost         Decimal? @db.Decimal(10, 2)
+  status       String   @db.VarChar(50) // completed, failed, timeout
+  taskId       String   @map("task_id") @db.VarChar(255) // UUID
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  deployment   Deployment?  @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([orgId, status])
+  @@index([taskId])
+  @@map("tasks")
+}
+
+model GovernorRule {
+  id                 Int      @id @default(autoincrement())
+  orgId              Int      @map("org_id")
+  agentId            Int      @map("agent_id")
+  budgetCap          Decimal? @map("budget_cap") @db.Decimal(10, 2)
+  rateLimit          Int?     @map("rate_limit")
+  accuracyThreshold  Decimal? @map("accuracy_threshold") @db.Decimal(5, 2)
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  agent        Agent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, agentId])
+  @@index([orgId])
+  @@index([agentId])
+  @@map("governor_rules")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  orgId        Int      @map("org_id")
+  userId       Int?     @map("user_id")
+  action       String   @db.VarChar(50) // hire, deploy, simulate, task, etc.
+  resourceType String?  @map("resource_type") @db.VarChar(50) // agent, deployment, org, etc.
+  resourceId   Int?     @map("resource_id")
+  details      Json? // JSONB
+  ipAddress    String?  @map("ip_address") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
+  @@index([orgId, createdAt(sort: Desc)])
+  @@index([userId])
+  @@map("audit_logs")
+}
