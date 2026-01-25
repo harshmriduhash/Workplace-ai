@@ -1,10 +1,10 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { AppContext } from '../App';
+import React, { useContext, useState, useEffect } from "react";
+import { AppContext } from "../App";
 
 export default function SimulationRunner() {
   const { orgId, API } = useContext(AppContext);
   const [agents, setAgents] = useState<any[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [selectedAgent, setSelectedAgent] = useState<string>("");
   const [simulations, setSimulations] = useState<any[]>([]);
   const [running, setRunning] = useState(false);
 
@@ -14,7 +14,7 @@ export default function SimulationRunner() {
         const res = await API.get(`/agents/${orgId}`);
         setAgents(res.data || []);
       } catch (err) {
-        console.error('Failed to fetch agents:', err);
+        console.error("Failed to fetch agents:", err);
       }
     };
     if (orgId) fetchAgents();
@@ -25,7 +25,7 @@ export default function SimulationRunner() {
       const res = await API.get(`/simulations/${orgId}`);
       setSimulations(res.data || []);
     } catch (err) {
-      console.error('Failed to fetch simulations:', err);
+      console.error("Failed to fetch simulations:", err);
     }
   };
 
@@ -35,19 +35,19 @@ export default function SimulationRunner() {
 
   const handleRunSimulation = async () => {
     if (!selectedAgent) {
-      alert('Please select an agent');
+      alert("Please select an agent");
       return;
     }
     setRunning(true);
     try {
-      await API.post('/simulations', {
+      await API.post("/simulations", {
         org_id: orgId,
-        agent_id: parseInt(selectedAgent)
+        agent_id: parseInt(selectedAgent),
       });
       await fetchSimulations();
-      alert('Simulation completed!');
+      alert("Simulation completed!");
     } catch (err) {
-      console.error('Failed to run simulation:', err);
+      console.error("Failed to run simulation:", err);
     }
     setRunning(false);
   };
@@ -55,9 +55,12 @@ export default function SimulationRunner() {
   return (
     <div>
       <h1>Workflow Simulator</h1>
-      <p style={{ color: '#6B7280', marginBottom: '30px' }}>Test agents before deployment. Run simulations against historical data and analyze performance.</p>
+      <p style={{ color: "#6B7280", marginBottom: "30px" }}>
+        Test agents before deployment. Run simulations against historical data
+        and analyze performance.
+      </p>
 
-      <div className="card" style={{ marginBottom: '30px' }}>
+      <div className="card" style={{ marginBottom: "30px" }}>
         <h2>New Simulation</h2>
         <div className="form-group">
           <label>Select Agent</label>
@@ -67,7 +70,9 @@ export default function SimulationRunner() {
           >
             <option value="">-- Choose an agent --</option>
             {agents.map((agent) => (
-              <option key={agent.id} value={agent.id}>{agent.name} ({agent.role})</option>
+              <option key={agent.id} value={agent.id}>
+                {agent.name} ({agent.role})
+              </option>
             ))}
           </select>
         </div>
@@ -76,7 +81,7 @@ export default function SimulationRunner() {
           onClick={handleRunSimulation}
           disabled={running || !selectedAgent}
         >
-          {running ? 'Running...' : 'Run Simulation'}
+          {running ? "Running..." : "Run Simulation"}
         </button>
       </div>
 
@@ -98,17 +103,25 @@ export default function SimulationRunner() {
               {simulations.map((sim) => (
                 <tr key={sim.id}>
                   <td>#{sim.agent_id}</td>
-                  <td><strong>{sim.accuracy?.toFixed(1)}%</strong></td>
+                  <td>
+                    <strong>{sim.accuracy?.toFixed(1)}%</strong>
+                  </td>
                   <td>${sim.cost?.toFixed(2)}</td>
                   <td>{sim.latency}ms</td>
                   <td>{sim.failure_rate?.toFixed(1)}%</td>
-                  <td><span className={`status-badge status-${sim.status}`}>{sim.status}</span></td>
+                  <td>
+                    <span className={`status-badge status-${sim.status}`}>
+                      {sim.status}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <p style={{ padding: '20px', color: '#6B7280' }}>No simulations yet. Run one to get started.</p>
+          <p style={{ padding: "20px", color: "#6B7280" }}>
+            No simulations yet. Run one to get started.
+          </p>
         )}
       </div>
     </div>
