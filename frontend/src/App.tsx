@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import axios from 'axios';
-import './App.css';
-import LandingPage from './pages/LandingPage';
-import Dashboard from './pages/Dashboard';
-import AgentMarketplace from './pages/AgentMarketplace';
-import SimulationRunner from './pages/SimulationRunner';
-import Deployments from './pages/Deployments';
-import Analytics from './pages/Analytics';
-import Governor from './pages/Governor';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import axios from "axios";
+import "./App.css";
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
+import AgentMarketplace from "./pages/AgentMarketplace";
+import SimulationRunner from "./pages/SimulationRunner";
+import Deployments from "./pages/Deployments";
+import Analytics from "./pages/Analytics";
+import Governor from "./pages/Governor";
 
 // Optional Clerk integration (only if VITE_CLERK_PUBLISHABLE_KEY is set)
 let ClerkProvider: any = null;
@@ -17,7 +17,7 @@ let SignInButton: any = null;
 let UserButton: any = null;
 
 try {
-  const clerkModule = require('@clerk/clerk-react');
+  const clerkModule = require("@clerk/clerk-react");
   if (clerkModule) {
     ClerkProvider = clerkModule.ClerkProvider;
     useAuth = clerkModule.useAuth;
@@ -29,12 +29,12 @@ try {
 }
 
 const API = axios.create({
-  baseURL: 'http://localhost:3001/api'
+  baseURL: "http://localhost:3001/api",
 });
 
 // Interceptor to add auth token if available
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -44,7 +44,9 @@ API.interceptors.request.use((config) => {
 export const AppContext = React.createContext<any>({});
 
 function App() {
-  const [orgId, setOrgId] = useState<string | null>(localStorage.getItem('orgId'));
+  const [orgId, setOrgId] = useState<string | null>(
+    localStorage.getItem("orgId"),
+  );
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -53,12 +55,12 @@ function App() {
       // Auto-create test org
       const createOrg = async () => {
         try {
-          const res = await API.post('/orgs', { name: 'Test Company' });
+          const res = await API.post("/orgs", { name: "Test Company" });
           const id = res.data.id;
           setOrgId(id);
-          localStorage.setItem('orgId', id);
+          localStorage.setItem("orgId", id);
         } catch (err) {
-          console.error('Failed to create org:', err);
+          console.error("Failed to create org:", err);
         }
       };
       createOrg();
@@ -76,12 +78,12 @@ function App() {
           // Store token for API calls
           if (auth?.getToken) {
             auth.getToken().then((token: string) => {
-              localStorage.setItem('auth_token', token);
+              localStorage.setItem("auth_token", token);
             });
           }
         }
       } catch (err) {
-        console.warn('Clerk auth check failed, continuing without auth');
+        console.warn("Clerk auth check failed, continuing without auth");
       }
     }
   }, [useAuth]);
@@ -99,12 +101,24 @@ function App() {
             <p className="tagline">Agent Workforce Operating System</p>
           </div>
           <ul className="nav-links">
-            <li><Link to="/dashboard">Dashboard</Link></li>
-            <li><Link to="/agents">Agents</Link></li>
-            <li><Link to="/simulations">Simulations</Link></li>
-            <li><Link to="/deployments">Deployments</Link></li>
-            <li><Link to="/governor">Governor</Link></li>
-            <li><Link to="/analytics">Analytics</Link></li>
+            <li>
+              <Link to="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link to="/agents">Agents</Link>
+            </li>
+            <li>
+              <Link to="/simulations">Simulations</Link>
+            </li>
+            <li>
+              <Link to="/deployments">Deployments</Link>
+            </li>
+            <li>
+              <Link to="/governor">Governor</Link>
+            </li>
+            <li>
+              <Link to="/analytics">Analytics</Link>
+            </li>
           </ul>
           <div className="navbar-auth">
             {UserButton ? <UserButton /> : null}
