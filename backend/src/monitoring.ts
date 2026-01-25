@@ -1,6 +1,6 @@
-import * as Sentry from '@sentry/node';
-import { ProfilingIntegration } from '@sentry/profiling-node';
-import { Express } from 'express';
+import * as Sentry from "@sentry/node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
+import { Express } from "express";
 
 /**
  * Initialize Sentry for error tracking and performance monitoring
@@ -8,13 +8,13 @@ import { Express } from 'express';
  */
 export const initSentry = (app: Express) => {
   if (!process.env.SENTRY_DSN) {
-    console.warn('⚠️  SENTRY_DSN not set - error tracking disabled');
+    console.warn("⚠️  SENTRY_DSN not set - error tracking disabled");
     return;
   }
 
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env.NODE_ENV || "development",
     integrations: [
       // Enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
@@ -24,11 +24,11 @@ export const initSentry = (app: Express) => {
       new ProfilingIntegration(),
     ],
     // Performance Monitoring
-    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
     // Profiling
-    profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
     // Don't send errors in development
-    enabled: process.env.NODE_ENV === 'production',
+    enabled: process.env.NODE_ENV === "production",
     // Scrub sensitive data
     beforeSend(event, hint) {
       // Remove sensitive headers
@@ -39,15 +39,15 @@ export const initSentry = (app: Express) => {
       // Remove sensitive query params
       if (event.request?.query_string) {
         const sanitized = event.request.query_string
-          .replace(/api_key=[^&]*/gi, 'api_key=[REDACTED]')
-          .replace(/token=[^&]*/gi, 'token=[REDACTED]');
+          .replace(/api_key=[^&]*/gi, "api_key=[REDACTED]")
+          .replace(/token=[^&]*/gi, "token=[REDACTED]");
         event.request.query_string = sanitized;
       }
       return event;
-    }
+    },
   });
 
-  console.log('✅ Sentry initialized for error tracking');
+  console.log("✅ Sentry initialized for error tracking");
 };
 
 /**
@@ -70,14 +70,17 @@ export const sentryErrorHandler = () => Sentry.Handlers.errorHandler();
  */
 export const captureException = (error: Error, context?: any) => {
   Sentry.captureException(error, {
-    extra: context
+    extra: context,
   });
 };
 
 /**
  * Capture message manually
  */
-export const captureMessage = (message: string, level: Sentry.SeverityLevel = 'info') => {
+export const captureMessage = (
+  message: string,
+  level: Sentry.SeverityLevel = "info",
+) => {
   Sentry.captureMessage(message, level);
 };
 
@@ -88,6 +91,6 @@ export const addBreadcrumb = (message: string, data?: any) => {
   Sentry.addBreadcrumb({
     message,
     data,
-    level: 'info'
+    level: "info",
   });
 };
