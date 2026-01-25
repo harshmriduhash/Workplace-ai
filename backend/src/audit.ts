@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
 
 export interface AuditLog {
   id: string;
@@ -30,9 +30,9 @@ export async function initAuditTable(pool: Pool) {
         INDEX idx_timestamp (created_at)
       );
     `);
-    console.log('✅ Audit logs table initialized');
+    console.log("✅ Audit logs table initialized");
   } catch (err) {
-    console.error('Audit table init error:', err);
+    console.error("Audit table init error:", err);
   }
 }
 
@@ -44,32 +44,40 @@ export async function logAudit(
   resourceType: string,
   resourceId: number,
   details: Record<string, any>,
-  ipAddress: string
+  ipAddress: string,
 ) {
   try {
     await pool.query(
       `INSERT INTO audit_logs (org_id, user_id, action, resource_type, resource_id, details, ip_address)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [orgId, userId, action, resourceType, resourceId, JSON.stringify(details), ipAddress]
+      [
+        orgId,
+        userId,
+        action,
+        resourceType,
+        resourceId,
+        JSON.stringify(details),
+        ipAddress,
+      ],
     );
   } catch (err) {
-    console.error('Audit logging error:', err);
+    console.error("Audit logging error:", err);
   }
 }
 
 export async function getAuditLogs(
   pool: Pool,
   orgId: number,
-  limit: number = 100
+  limit: number = 100,
 ) {
   try {
     const result = await pool.query(
       `SELECT * FROM audit_logs WHERE org_id = $1 ORDER BY created_at DESC LIMIT $2`,
-      [orgId, limit]
+      [orgId, limit],
     );
     return result.rows;
   } catch (err) {
-    console.error('Get audit logs error:', err);
+    console.error("Get audit logs error:", err);
     return [];
   }
 }
