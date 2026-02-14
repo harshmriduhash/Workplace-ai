@@ -1,15 +1,49 @@
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import { runAISimulation, runAgentTask, sendEmailDeployment } from './services';
-import { initAuditTable, logAudit, getAuditLogs } from './audit';
-import { checkGovernorRules, recordAccuracy } from './governor';
+
+// Import services and utilities
+import { runSimulation, sendDeploymentEmail } from './services.js';
+import { logAudit } from './audit.js';
+import { checkGovernorRules } from './governor.js';
+import { validateEnv } from './config.js';
+import {
+  validate,
+  createOrgSchema,
+  createAgentSchema,
+  createSimulationSchema,
+  createDeploymentSchema,
+  createTaskSchema,
+  createGovernorRuleSchema,
+  validateOrgId,
+  validateAgentId
+} from './validation.js';
+import { configureSecurityHeaders, additionalSecurityMiddleware } from './security.js';
+import { apiLimiter, expensiveOperationLimiter, readLimiter } from './rateLimiting.js';
+import { initSentry, sentryRequestHandler, sentryTracingHandler, sentryErrorHandler } from './monitoring.js';
+import { logInfo, logError, logWarn } from './logger.js';
+import { exportUserData, deleteUserData, anonymizeUserData, updateUserData } from './gdpr.js';
+
+// Validate environment before starting
+const env = validateEnv();
+logInfo('Environment validated successfully', { nodeEnv: env.NODE_ENV });
 
 const app = express();
+
+// Initialize monitoring
+initSentry(app);
+
+// Apply security and monitoring middleware FIRST
+app.use(sentryRequestHandler());
+app.use(sentryTracingHandler());
+configureSecurityHeaders(app);
+app.use(additionalSecurityMiddleware);
+
+// CORS and body parsing
 app.use(cors());
 app.use(express.json());
 
