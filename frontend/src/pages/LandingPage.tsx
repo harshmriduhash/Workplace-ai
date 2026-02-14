@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="landing-page">
       <nav className="mini-nav">
@@ -8,7 +11,7 @@ export default function LandingPage() {
         <div className="nav-links">
           <a href="#features">Features</a>
           <a href="#solutions">Solutions</a>
-          <button className="btn-small" onClick={() => window.location.href = '/dashboard'}>Launch Console</button>
+          <button className="btn-small" onClick={() => navigate('/dashboard')}>Launch Console</button>
         </div>
       </nav>
 
@@ -18,7 +21,7 @@ export default function LandingPage() {
           <h1>The Operating System for your <span className="gradient-text">AI Workforce</span></h1>
           <p>Deploy, simulate, and govern autonomous agents with enterprise-grade reliability. Control costs and maximize ROI in one central console.</p>
           <div className="hero-cta">
-            <button className="primary-btn" onClick={() => window.location.href = '/dashboard'}>Start Building</button>
+            <button className="primary-btn" onClick={() => navigate('/dashboard')}>Start Building</button>
             <button className="secondary-btn">Watch Demo</button>
           </div>
         </div>
