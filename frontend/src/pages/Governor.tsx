@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../App';
+import { PulseLoader } from '../components/PulseLoader';
 
 export default function Governor() {
   const { orgId, API } = useContext(AppContext);
@@ -11,6 +12,7 @@ export default function Governor() {
     rate_limit: 1000,
     accuracy_threshold: 80
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -29,38 +31,47 @@ export default function Governor() {
     try {
       const res = await API.get(`/governor/${orgId}/${agentId}`);
       setRules(res.data || {});
+      if (res.data) {
+        setFormData({
+          budget_cap: res.data.budget_cap || 100,
+          rate_limit: res.data.rate_limit || 1000,
+          accuracy_threshold: res.data.accuracy_threshold || 80
+        });
+      }
     } catch (err) {
       console.error('Failed to fetch rules:', err);
     }
   };
 
   const handleSaveRules = async () => {
-    if (!selectedAgent) {
-      alert('Please select an agent');
-      return;
-    }
+    if (!selectedAgent) return;
+    setSaving(true);
     try {
       await API.post('/governor', {
         org_id: orgId,
         agent_id: parseInt(selectedAgent),
         ...formData
       });
-      alert('Governor rules saved!');
+      // Refresh local state
+      setRules({ ...formData });
     } catch (err) {
       console.error('Failed to save rules:', err);
     }
+    setSaving(false);
   };
 
   return (
-    <div>
-      <h1>Agent Governor</h1>
-      <p style={{ color: '#6B7280', marginBottom: '30px' }}>Prevent chaos. Control budget, rate limits, accuracy thresholds, and auto-pause/rollback rules.</p>
+    <div className="governor-page">
+      <header className="section-header" style={{ textAlign: 'left', marginBottom: '40px' }}>
+        <h1>Agent Governor</h1>
+        <p style={{ color: 'var(--text-muted)' }}>Prevent chaos. Control budget, rate limits, and accuracy thresholds automatically.</p>
+      </header>
 
-      <div className="grid-2">
-        <div className="card">
-          <h2>Select Agent</h2>
+      <div className="grid-2" style={{ marginBottom: '30px' }}>
+        <div className="card glass">
+          <h3 style={{ marginBottom: '20px' }}>Agent Selection</h3>
           <div className="form-group">
-            <label>Agent</label>
+            <label>Target Agent</label>
             <select
               value={selectedAgent}
               onChange={(e) => handleSelectAgent(e.target.value)}
@@ -71,14 +82,17 @@ export default function Governor() {
               ))}
             </select>
           </div>
+          {!selectedAgent && (
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Select an agent to configure governance rules.</p>
+          )}
         </div>
 
-        <div className="card">
-          <h2>Governor Rules</h2>
-          {selectedAgent && (
+        <div className="card glass">
+          <h3 style={{ marginBottom: '20px' }}>Configure Constraints</h3>
+          {selectedAgent ? (
             <>
               <div className="form-group">
-                <label>Budget Cap ($)</label>
+                <label>Monthly Budget Cap ($)</label>
                 <input
                   type="number"
                   value={formData.budget_cap}
@@ -87,7 +101,7 @@ export default function Governor() {
               </div>
 
               <div className="form-group">
-                <label>Rate Limit (tasks/day)</label>
+                <label>Daily Rate Limit (tasks)</label>
                 <input
                   type="number"
                   value={formData.rate_limit}
@@ -96,7 +110,7 @@ export default function Governor() {
               </div>
 
               <div className="form-group">
-                <label>Accuracy Threshold (%)</label>
+                <label>Min. Accuracy Threshold (%)</label>
                 <input
                   type="number"
                   min="0"
@@ -106,26 +120,37 @@ export default function Governor() {
                 />
               </div>
 
-              <button className="button" onClick={handleSaveRules}>
-                Save Rules
+              <button className="button" onClick={handleSaveRules} disabled={saving} style={{ width: '100%' }}>
+                {saving ? <PulseLoader size="8px" color="white" /> : "Apply Rules"}
               </button>
             </>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'var(--text-muted)' }}>
+              Ready to configure...
+            </div>
           )}
         </div>
       </div>
 
-      <div className="card">
-        <h2>Rules Summary</h2>
-        {selectedAgent && Object.keys(rules).length > 0 ? (
-          <ul style={{ lineHeight: '2' }}>
-            <li>💰 Budget Cap: <strong>${rules.budget_cap}</strong></li>
-            <li>📊 Rate Limit: <strong>{rules.rate_limit} tasks/day</strong></li>
-            <li>🎯 Accuracy Threshold: <strong>{rules.accuracy_threshold}%</strong></li>
-          </ul>
-        ) : (
-          <p style={{ color: '#6B7280' }}>Select an agent to see or create rules.</p>
-        )}
-      </div>
+      {selectedAgent && (
+        <div className="card glass" style={{ borderLeft: '4px solid var(--primary)' }}>
+          <h3 style={{ marginBottom: '20px' }}>Active Governance Summary</h3>
+          <div className="grid-3">
+            <div className="stat-card">
+              <span className="stat-label">Budget</span>
+              <span className="stat-value">${rules.budget_cap || formData.budget_cap}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-label">Rate Limit</span>
+              <span className="stat-value">{rules.rate_limit || formData.rate_limit}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-label">Accuracy</span>
+              <span className="stat-value" style={{ color: 'var(--success)' }}>{rules.accuracy_threshold || formData.accuracy_threshold}%</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
