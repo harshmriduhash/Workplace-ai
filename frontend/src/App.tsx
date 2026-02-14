@@ -119,6 +119,9 @@ function App() {
             <li>
               <Link to="/analytics">Analytics</Link>
             </li>
+            <li>
+              <Link to="/billing">Billing</Link>
+            </li>
           </ul>
           <div className="navbar-auth">
             {UserButton ? <UserButton /> : null}
@@ -135,6 +138,7 @@ function App() {
             <Route path="/deployments" element={<Deployments />} />
             <Route path="/governor" element={<Governor />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/billing" element={<Billing />} />
             <Route path="/" element={<Dashboard />} />
           </Routes>
         </main>

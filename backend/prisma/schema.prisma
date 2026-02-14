@@ -15,6 +15,9 @@ model Organization {
   name      String   @unique @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
+  subscriptionStatus String   @default("free") @map("subscription_status")
+  stripeCustomerId   String?  @unique @map("stripe_customer_id")
+
   users         User[]
   agents        Agent[]
   simulations   Simulation[]
