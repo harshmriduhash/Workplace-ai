@@ -1,8 +1,53 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
+import { AppContext } from '../App';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isDemo } = useContext(AppContext);
+
+  const renderNavButtons = () => {
+    if (isDemo) {
+      return (
+        <button className="btn-small" onClick={() => navigate('/dashboard')}>Launch Console (Demo)</button>
+      );
+    }
+    return (
+      <>
+        <SignedIn>
+          <button className="btn-small" onClick={() => navigate('/dashboard')}>Console</button>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button className="btn-small">Login</button>
+          </SignInButton>
+        </SignedOut>
+      </>
+    );
+  };
+
+  const renderHeroCta = () => {
+    if (isDemo) {
+      return (
+        <button className="primary-btn" onClick={() => navigate('/dashboard')}>Start Building (Demo)</button>
+      );
+    }
+    return (
+      <>
+        <SignedIn>
+          <button className="primary-btn" onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
+        </SignedIn>
+        <SignedOut>
+          <SignUpButton mode="modal">
+            <button className="primary-btn">Get Started — It's Free</button>
+          </SignUpButton>
+          <button className="secondary-btn">Watch Demo</button>
+        </SignedOut>
+      </>
+    );
+  };
 
   return (
     <div className="landing-page">
@@ -11,7 +56,7 @@ export default function LandingPage() {
         <div className="nav-links">
           <a href="#features">Features</a>
           <a href="#solutions">Solutions</a>
-          <button className="btn-small" onClick={() => navigate('/dashboard')}>Launch Console</button>
+          {renderNavButtons()}
         </div>
       </nav>
 
@@ -21,8 +66,7 @@ export default function LandingPage() {
           <h1>The Operating System for your <span className="gradient-text">AI Workforce</span></h1>
           <p>Deploy, simulate, and govern autonomous agents with enterprise-grade reliability. Control costs and maximize ROI in one central console.</p>
           <div className="hero-cta">
-            <button className="primary-btn" onClick={() => navigate('/dashboard')}>Start Building</button>
-            <button className="secondary-btn">Watch Demo</button>
+            {renderHeroCta()}
           </div>
         </div>
         <div className="hero-visual">
@@ -90,9 +134,9 @@ export default function LandingPage() {
           margin: 0 auto;
         }
 
-        .logo { font-weight: 800; fontSize: 22px; letter-spacing: -1px; }
+        .logo { font-weight: 800; font-size: 22px; letter-spacing: -1px; }
         .mini-nav .nav-links { display: flex; align-items: center; gap: 32px; }
-        .mini-nav a { color: #94A3B8; font-weight: 600; font-size: 14px; transition: color 0.2s; }
+        .mini-nav a { color: #94A3B8; font-weight: 600; font-size: 14px; transition: color 0.2s; text-decoration: none; }
         .mini-nav a:hover { color: #FFFFFF; }
 
         .btn-small {
@@ -103,6 +147,7 @@ export default function LandingPage() {
           border-radius: 99px;
           font-weight: 600;
           font-size: 13px;
+          cursor: pointer;
         }
 
         .hero-section {
