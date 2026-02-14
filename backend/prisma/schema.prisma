@@ -20,8 +20,8 @@ model Organization {
   simulations   Simulation[]
   deployments   Deployment[]
   tasks         Task[]
-  governorRules GovernorRule[] @map("governor_rules")
-  auditLogs     AuditLog[]     @map("audit_logs")
+  governorRules GovernorRule[]
+  auditLogs     AuditLog[]
 
   @@map("orgs")
 }
