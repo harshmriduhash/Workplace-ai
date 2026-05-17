@@ -1,19 +1,19 @@
 :root {
-  /* Core Palette - Enterprise Dark */
-  --bg-deep: #0B0F19;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --bg-glass: rgba(17, 24, 39, 0.7);
+  /* Core Palette - Neon Obsidian */
+  --bg-deep: #050505;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --bg-glass: rgba(0, 0, 0, 0.6);
 
-  --primary: #3B82F6;
-  --primary-hover: #2563EB;
-  --accent: #60A5FA;
-  --success: #34D399;
+  --primary: #00E5FF;
+  --primary-hover: #00B8CC;
+  --accent: #00FA9A;
+  --success: #00FA9A;
   --warning: #F59E0B;
-  --danger: #EF4444;
+  --danger: #FF3366;
 
-  --text-main: #F9FAFB;
-  --text-muted: #94A3B8;
-  --border-glass: rgba(255, 255, 255, 0.08);
+  --text-main: #FFFFFF;
+  --text-muted: #A1A1AA;
+  --border-glass: rgba(255, 255, 255, 0.05);
   --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -97,8 +97,9 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, #60A5FA, #34D399);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -164,27 +165,30 @@ body {
 /* Button Design System */
 .button {
   background: var(--primary);
-  color: white;
+  color: #000000;
   border: none;
   padding: 12px 24px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
 }
 
 .button:hover {
   background: var(--primary-hover);
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
 }
 
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .button-secondary {

@@ -116,40 +116,92 @@ export default function LandingPage({ forceAuthOverlay = false }) {
       </section>
 
       <footer className="landing-footer">
-        <p>© 2026 Workplace-AI Inc. Built for the era of Autonomy.</p>
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <span className="logo-text">Workplace<span className="gradient-text">-AI</span></span>
+            <p>Deploy, simulate, and govern autonomous agents with enterprise-grade reliability in one central console.</p>
+          </div>
+          <div className="footer-links">
+            <h4>Product</h4>
+            <a href="#">Agent Marketplace</a>
+            <a href="#">Simulations</a>
+            <a href="#">Governor API</a>
+            <a href="#">Pricing</a>
+          </div>
+          <div className="footer-links">
+            <h4>Resources</h4>
+            <a href="#">Documentation</a>
+            <a href="#">API Reference</a>
+            <a href="#">Blog</a>
+            <a href="#">Community</a>
+          </div>
+          <div className="footer-links">
+            <h4>Company</h4>
+            <a href="#">About Us</a>
+            <a href="#">Careers</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>© 2026 Workplace-AI Inc. Built for the era of Autonomy.</p>
+        </div>
       </footer>
 
       <style>{`
         .landing-page { min-height: 100vh; background: var(--bg-deep); }
-        .hero-section { display: flex; align-items: center; padding: 100px 40px; max-width: 1280px; margin: 0 auto; gap: 60px; }
+        .hero-section { display: flex; align-items: center; padding: 60px 40px; max-width: 1280px; margin: 0 auto; gap: 40px; }
         .hero-content { flex: 1; }
-        .hero-content h1 { font-size: 64px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
-        .hero-content p { font-size: 20px; color: var(--text-muted); margin-bottom: 40px; }
-        .badge { background: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 800; margin-bottom: 20px; display: inline-block; }
+        .hero-content h1 { font-size: 56px; font-weight: 800; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px; }
+        .hero-content p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; line-height: 1.6; }
+        .badge { background: rgba(0, 229, 255, 0.1); color: var(--primary); padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 800; margin-bottom: 24px; display: inline-block; border: 1px solid rgba(0, 229, 255, 0.2); }
         
-        .hero-cta { display: flex; gap: 16px; }
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.2s; }
-        .primary-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .secondary-btn { background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border-glass); padding: 16px 32px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+        .primary-btn { background: var(--primary); color: #000; border: none; padding: 16px 32px; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); }
+        .primary-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 229, 255, 0.4); }
+        .secondary-btn { background: rgba(255,255,255,0.02); color: white; border: 1px solid var(--border-glass); padding: 16px 32px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .secondary-btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
         
-        .hero-visual { flex: 1; position: relative; }
-        .floating-img { width: 100%; border-radius: 12px; }
-        .glow-effect { position: absolute; width: 150%; height: 150%; top: -25%; left: -25%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); pointer-events: none; z-index: -1; }
+        .hero-visual { flex: 1.2; position: relative; }
+        .floating-img-container { padding: 8px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0)); }
+        .floating-img { width: 100%; border-radius: 12px; display: block; border: 1px solid rgba(255,255,255,0.05); }
+        .glow-effect { position: absolute; width: 120%; height: 120%; top: -10%; left: -10%; background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 60%); pointer-events: none; z-index: -1; }
         
-        .features-section { padding: 100px 40px; max-width: 1280px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 60px; }
-        .section-header h2 { font-size: 40px; font-weight: 800; }
+        .features-section { padding: 80px 40px; max-width: 1280px; margin: 0 auto; border-top: 1px solid var(--border-glass); }
+        .section-header { text-align: center; margin-bottom: 50px; }
+        .section-header h2 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 15px; }
         
-        .icon { font-size: 32px; margin-bottom: 16px; }
-        .card h3 { margin-bottom: 12px; font-size: 20px; }
-        .card p { color: var(--text-muted); line-height: 1.5; }
+        .icon { font-size: 36px; margin-bottom: 20px; }
+        .card h3 { margin-bottom: 12px; font-size: 20px; font-weight: 700; }
+        .card p { color: var(--text-muted); line-height: 1.6; }
+
+        /* Footer Styling */
+        .landing-footer { border-top: 1px solid var(--border-glass); background: #000; padding: 60px 40px 20px; margin-top: 60px; }
+        .footer-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 40px; }
+        .footer-brand p { color: var(--text-muted); margin-top: 15px; line-height: 1.6; font-size: 14px; padding-right: 40px; }
+        .footer-links { display: flex; flex-direction: column; gap: 12px; }
+        .footer-links h4 { font-size: 14px; font-weight: 700; color: white; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer-links a { font-size: 14px; color: var(--text-muted); transition: color 0.2s; }
+        .footer-links a:hover { color: var(--primary); }
+        .footer-bottom { max-width: 1280px; margin: 0 auto; padding-top: 20px; border-top: 1px solid var(--border-glass); text-align: center; font-size: 12px; color: #52525B; }
 
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.4); }
+          70% { box-shadow: 0 0 0 15px rgba(0, 229, 255, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
         }
         .pulse { animation: pulse 2s infinite; }
+
+        /* Responsive Improvements */
+        @media (max-width: 1024px) {
+          .hero-section { flex-direction: column; text-align: center; padding: 40px 20px; }
+          .hero-cta { justify-content: center; }
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px 20px; }
+        }
+        @media (max-width: 768px) {
+          .footer-grid { grid-template-columns: 1fr; }
+          .hero-content h1 { font-size: 40px; }
+        }
       `}</style>
     </div>
   );
