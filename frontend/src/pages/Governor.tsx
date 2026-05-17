@@ -17,7 +17,7 @@ export default function Governor() {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const res = await API.get(`/agents/${orgId}`);
+        const res = await API.get(`/agents`);
         setAgents(res.data || []);
       } catch (err) {
         console.error('Failed to fetch agents:', err);
@@ -29,13 +29,14 @@ export default function Governor() {
   const handleSelectAgent = async (agentId: string) => {
     setSelectedAgent(agentId);
     try {
-      const res = await API.get(`/governor/${orgId}/${agentId}`);
-      setRules(res.data || {});
-      if (res.data) {
+      const res = await API.get(`/governor_rules`);
+      const rule = res.data.find((r: any) => r.agent_id === parseInt(agentId)) || {};
+      setRules(rule);
+      if (rule) {
         setFormData({
-          budget_cap: res.data.budget_cap || 100,
-          rate_limit: res.data.rate_limit || 1000,
-          accuracy_threshold: res.data.accuracy_threshold || 80
+          budget_cap: rule.budget_cap || 100,
+          rate_limit: rule.rate_limit || 1000,
+          accuracy_threshold: rule.accuracy_threshold || 80
         });
       }
     } catch (err) {
@@ -47,8 +48,7 @@ export default function Governor() {
     if (!selectedAgent) return;
     setSaving(true);
     try {
-      await API.post('/governor', {
-        org_id: orgId,
+      await API.post('/governor_rules', {
         agent_id: parseInt(selectedAgent),
         ...formData
       });

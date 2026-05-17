@@ -10,7 +10,7 @@ export default function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await API.get(`/analytics/${orgId}`);
+        const res = await API.get(`/analytics`);
         setAnalytics(res.data);
       } catch (err) {
         console.error('Failed to fetch analytics:', err);
