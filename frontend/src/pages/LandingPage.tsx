@@ -21,7 +21,7 @@ export default function LandingPage({ forceAuthOverlay = false }) {
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
         <SignedOut>
-          <SignInButton mode="modal">
+          <SignInButton mode="modal" redirectUrl="/dashboard" afterSignInUrl="/dashboard" afterSignUpUrl="/dashboard">
             <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>Login</button>
           </SignInButton>
         </SignedOut>
@@ -38,7 +38,7 @@ export default function LandingPage({ forceAuthOverlay = false }) {
             <div style={{ marginBottom: '20px' }}><PulseLoader size="16px" /></div>
             <h2>Member Access Required</h2>
             <p>Please sign in with your enterprise account to access AI workforce simulations and analytics.</p>
-            <SignInButton mode="modal">
+            <SignInButton mode="modal" redirectUrl="/dashboard" afterSignInUrl="/dashboard" afterSignUpUrl="/dashboard">
               <button className="button" style={{ width: '100%' }}>Sign In to Dashboard</button>
             </SignInButton>
             <button className="button button-secondary" style={{ width: '100%', marginTop: '12px' }} onClick={() => navigate('/')}>
@@ -73,7 +73,7 @@ export default function LandingPage({ forceAuthOverlay = false }) {
                   <button className="primary-btn" onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
                 </SignedIn>
                 <SignedOut>
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode="modal" redirectUrl="/dashboard" afterSignInUrl="/dashboard" afterSignUpUrl="/dashboard">
                     <button className="primary-btn">Get Started — It's Free</button>
                   </SignUpButton>
                   <button className="secondary-btn" onClick={() => navigate('/dashboard')}>Watch Preview</button>
