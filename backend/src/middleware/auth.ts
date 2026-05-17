@@ -47,14 +47,16 @@ async function provisionDemoUser(req: AuthRequest): Promise<void> {
     let userResult = await getPool().query('SELECT * FROM users WHERE clerk_id = $1', [demoClerkId]);
 
     if (userResult.rowCount === 0) {
+        // Upsert the demo org — handle name collision gracefully
         let orgResult = await getPool().query("SELECT * FROM orgs WHERE clerk_org_id = 'demo_org_local'");
         if (orgResult.rowCount === 0) {
             orgResult = await getPool().query(
-                "INSERT INTO orgs (name, clerk_org_id) VALUES ('Demo Organization', 'demo_org_local') RETURNING *"
+                "INSERT INTO orgs (name, clerk_org_id) VALUES ('Demo Organization', 'demo_org_local') ON CONFLICT (name) DO UPDATE SET clerk_org_id = 'demo_org_local' RETURNING *"
             );
         }
+        // Upsert the demo user
         userResult = await getPool().query(
-            "INSERT INTO users (org_id, email, clerk_id, role) VALUES ($1, 'demo@workplace-ai.local', $2, 'admin') RETURNING *",
+            "INSERT INTO users (org_id, email, clerk_id, role) VALUES ($1, 'demo@workplace-ai.local', $2, 'admin') ON CONFLICT (clerk_id) DO UPDATE SET org_id = $1 RETURNING *",
             [orgResult.rows[0].id, demoClerkId]
         );
     }
