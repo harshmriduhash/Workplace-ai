@@ -15,8 +15,8 @@ export default function Deployments() {
     const fetchData = async () => {
       try {
         const [agentsRes, deploymentsRes] = await Promise.all([
-          API.get(`/agents/${orgId}`),
-          API.get(`/deployments/${orgId}`)
+          API.get(`/agents`),
+          API.get(`/deployments`)
         ]);
         setAgents(agentsRes.data || []);
         setDeployments(deploymentsRes.data || []);
@@ -37,7 +37,7 @@ export default function Deployments() {
         agent_id: parseInt(selectedAgent),
         environment: 'email'
       });
-      const res = await API.get(`/deployments/${orgId}`);
+      const res = await API.get(`/deployments`);
       setDeployments(res.data || []);
     } catch (err) {
       console.error('Failed to deploy:', err);
