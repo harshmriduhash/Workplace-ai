@@ -12,7 +12,7 @@ export const createOrgSchema = z.object({
 
 // Agent schemas
 export const createAgentSchema = z.object({
-  org_id: z.number().int().positive(),
+  org_id: z.number().int().positive().optional(),
   name: z.string().min(1).max(255).trim(),
   role: z.string().min(1).max(255).trim(),
   description: z.string().max(2000).optional(),
@@ -22,20 +22,20 @@ export const createAgentSchema = z.object({
 
 // Simulation schemas
 export const createSimulationSchema = z.object({
-  org_id: z.number().int().positive(),
+  org_id: z.number().int().positive().optional(),
   agent_id: z.number().int().positive(),
 });
 
 // Deployment schemas
 export const createDeploymentSchema = z.object({
-  org_id: z.number().int().positive(),
+  org_id: z.number().int().positive().optional(),
   agent_id: z.number().int().positive(),
   environment: z.enum(['development', 'staging', 'production']),
 });
 
 // Task schemas
 export const createTaskSchema = z.object({
-  org_id: z.number().int().positive(),
+  org_id: z.number().int().positive().optional(),
   agent_id: z.number().int().positive(),
   deployment_id: z.number().int().positive().optional(),
   input: z.string().min(1).max(10000).trim(),
@@ -43,7 +43,7 @@ export const createTaskSchema = z.object({
 
 // Governor schemas
 export const createGovernorRuleSchema = z.object({
-  org_id: z.number().int().positive(),
+  org_id: z.number().int().positive().optional(),
   agent_id: z.number().int().positive(),
   budget_cap: z.number().nonnegative().optional(),
   rate_limit: z.number().int().positive().optional(),
@@ -63,21 +63,21 @@ export const validate = (schema: z.ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       // Validate body, query, or params based on what's present
-      const dataToValidate = req.body && Object.keys(req.body).length > 0 
-        ? req.body 
+      const dataToValidate = req.body && Object.keys(req.body).length > 0
+        ? req.body
         : req.query && Object.keys(req.query).length > 0
-        ? req.query
-        : req.params;
+          ? req.query
+          : req.params;
 
       const validated = schema.parse(dataToValidate);
-      
+
       // Replace request data with validated data
       if (req.body && Object.keys(req.body).length > 0) {
         req.body = validated;
       } else if (req.query && Object.keys(req.query).length > 0) {
         req.query = validated as any;
       }
-      
+
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -108,11 +108,11 @@ export const sanitizeString = (str: string): string => {
  */
 export const validateOrgId = (req: Request, res: Response, next: NextFunction) => {
   const orgId = parseInt(req.params.org_id);
-  
+
   if (isNaN(orgId) || orgId <= 0) {
     return res.status(400).json({ error: 'Invalid org_id parameter' });
   }
-  
+
   req.params.org_id = orgId.toString();
   next();
 };
@@ -122,11 +122,11 @@ export const validateOrgId = (req: Request, res: Response, next: NextFunction) =
  */
 export const validateAgentId = (req: Request, res: Response, next: NextFunction) => {
   const agentId = parseInt(req.params.agent_id);
-  
+
   if (isNaN(agentId) || agentId <= 0) {
     return res.status(400).json({ error: 'Invalid agent_id parameter' });
   }
-  
+
   req.params.agent_id = agentId.toString();
   next();
 };

@@ -19,7 +19,7 @@ export const apiLimiter = rateLimit({
   skip: (req: Request) => req.path === '/api/health',
   // Use IP address as key
   keyGenerator: (req: Request) => {
-    return req.ipAddress || req.ip || 'unknown';
+    return (req as any).ipAddress || req.ip || 'unknown';
   }
 });
 
@@ -48,7 +48,7 @@ export const expensiveOperationLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
     // Rate limit per org for expensive operations
-    return `${req.ipAddress || req.ip}-${req.body?.org_id || 'unknown'}`;
+    return `${(req as any).ipAddress || req.ip}-${req.body?.org_id || 'unknown'}`;
   }
 });
 

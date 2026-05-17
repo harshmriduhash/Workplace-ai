@@ -182,7 +182,7 @@ app.post('/api/orgs', validate(createOrgSchema), async (req: AuthRequest, res: R
   try {
     const { name } = req.body;
     const result = await pool.query('INSERT INTO orgs (name) VALUES ($1) RETURNING *', [name]);
-    await logAudit(pool, result.rows[0].id, req.userId, 'create_org', 'org', result.rows[0].id, {}, (req as any).ipAddress);
+    await logAudit(pool, result.rows[0].id, req.userId!, 'create_org', 'org', result.rows[0].id, {}, (req as any).ipAddress);
     res.json(result.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to create organization' });
@@ -216,7 +216,7 @@ app.post('/api/agents', validate(createAgentSchema), async (req: AuthRequest, re
       [req.orgId, name, role, description || '', JSON.stringify(tools || []), cost_per_task || 1.0, 'inactive']
     );
 
-    await logAudit(pool, req.orgId!, req.userId, 'hire', 'agent', result.rows[0].id, { role }, (req as any).ipAddress);
+    await logAudit(pool, req.orgId!, req.userId!, 'hire', 'agent', result.rows[0].id, { role }, (req as any).ipAddress);
     res.json(result.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -275,6 +275,95 @@ app.post('/api/tasks', validate(createTaskSchema), async (req: AuthRequest, res:
     );
 
     res.json(taskResult.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Deployments
+app.get('/api/deployments', async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT d.*, a.name as agent_name, a.role as agent_role 
+      FROM deployments d 
+      JOIN agents a ON d.agent_id = a.id 
+      WHERE d.org_id = $1 ORDER BY d.created_at DESC`, [req.orgId]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/deployments', validate(createDeploymentSchema), async (req: AuthRequest, res: Response) => {
+  try {
+    const { agent_id, environment } = req.body;
+    const result = await pool.query(
+      'INSERT INTO deployments (org_id, agent_id, environment) VALUES ($1, $2, $3) RETURNING *',
+      [req.orgId, agent_id, environment || 'production']
+    );
+    await logAudit(pool, req.orgId!, req.userId!, 'deploy', 'deployment', result.rows[0].id, { environment }, (req as any).ipAddress);
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Missing Simulation GET
+app.get('/api/simulations', async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await pool.query('SELECT * FROM simulations WHERE org_id = $1 ORDER BY created_at DESC', [req.orgId]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Governor Rules
+app.get('/api/governor_rules', async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await pool.query('SELECT * FROM governor_rules WHERE org_id = $1', [req.orgId]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/governor_rules', validate(createGovernorRuleSchema), async (req: AuthRequest, res: Response) => {
+  try {
+    const { agent_id, budget_cap, rate_limit, accuracy_threshold } = req.body;
+    const result = await pool.query(
+      `INSERT INTO governor_rules (org_id, agent_id, budget_cap, rate_limit, accuracy_threshold) 
+       VALUES ($1, $2, $3, $4, $5) 
+       ON CONFLICT (org_id, agent_id) DO UPDATE 
+       SET budget_cap = EXCLUDED.budget_cap, rate_limit = EXCLUDED.rate_limit, accuracy_threshold = EXCLUDED.accuracy_threshold 
+       RETURNING *`,
+      [req.orgId, agent_id, budget_cap, rate_limit, accuracy_threshold]
+    );
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Analytics Dashboard
+app.get('/api/analytics', async (req: AuthRequest, res: Response) => {
+  try {
+    const tasksCount = await pool.query('SELECT COUNT(*) FROM tasks WHERE org_id = $1', [req.orgId]);
+    const costSum = await pool.query('SELECT SUM(cost) as total FROM tasks WHERE org_id = $1', [req.orgId]);
+    const avgCost = await pool.query('SELECT AVG(cost) as avg FROM tasks WHERE org_id = $1', [req.orgId]);
+
+    // Status can be inactive, we just want total agents or active agents
+    const agentsCount = await pool.query('SELECT COUNT(*) FROM agents WHERE org_id = $1', [req.orgId]);
+
+    const simHistory = await pool.query('SELECT created_at, accuracy, cost FROM simulations WHERE org_id = $1 ORDER BY created_at DESC LIMIT 10', [req.orgId]);
+
+    res.json({
+      totalTasks: parseInt(tasksCount.rows[0].count) || 0,
+      totalSpend: parseFloat(costSum.rows[0].total) || 0,
+      costPerTask: parseFloat(avgCost.rows[0].avg) || 0,
+      activeAgents: parseInt(agentsCount.rows[0].count) || 0,
+      recentSimulations: simHistory.rows
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
