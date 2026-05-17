@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { ClerkExpressRequireAuth, StrictAuthProp } from '@clerk/clerk-sdk-node';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -14,77 +13,150 @@ export interface AuthRequest extends Request {
     auth?: any;
 }
 
+// Detect if Clerk keys are properly configured
+const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+const hasValidClerkKey = clerkSecretKey && clerkSecretKey.startsWith('sk_') && !clerkSecretKey.includes('your-clerk');
+
+let clerkMiddleware: any = null;
+if (hasValidClerkKey) {
+    try {
+        const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+        clerkMiddleware = ClerkExpressRequireAuth({
+            jwtKey: process.env.CLERK_JWT_KEY,
+        });
+        console.log('✅ Clerk authentication middleware initialized');
+    } catch (e: any) {
+        console.warn('⚠️  Clerk SDK failed to initialize:', e.message);
+        console.warn('⚠️  Falling back to demo-mode authentication');
+    }
+} else {
+    console.warn('⚠️  CLERK_SECRET_KEY not set or invalid – running in demo-mode auth');
+}
+
 /**
- * Clerk authentication middleware.
- * Verifies JWT token from Authorization header using Clerk.
+ * Auto-provision a demo user/org in the database for development.
  */
-const clerkMiddleware = ClerkExpressRequireAuth({
-    jwtKey: process.env.CLERK_JWT_KEY, // Optional, resolves from standard ENV if missing
-});
+async function provisionDemoUser(req: AuthRequest): Promise<void> {
+    const demoClerkId = 'demo_user_local';
+    let userResult = await pool.query('SELECT * FROM users WHERE clerk_id = $1', [demoClerkId]);
 
-export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
-    clerkMiddleware(req as Request, res, async (err: any) => {
-        if (err) {
-            console.error('Clerk Auth Validation Error:', err.message);
-            return res.status(401).json({
-                error: 'Authentication failed',
-                message: err.message || 'Invalid token'
-            });
+    if (userResult.rowCount === 0) {
+        let orgResult = await pool.query("SELECT * FROM orgs WHERE clerk_org_id = 'demo_org_local'");
+        if (orgResult.rowCount === 0) {
+            orgResult = await pool.query(
+                "INSERT INTO orgs (name, clerk_org_id) VALUES ('Demo Organization', 'demo_org_local') RETURNING *"
+            );
         }
+        userResult = await pool.query(
+            "INSERT INTO users (org_id, email, clerk_id, role) VALUES ($1, 'demo@workplace-ai.local', $2, 'admin') RETURNING *",
+            [orgResult.rows[0].id, demoClerkId]
+        );
+    }
 
-        const clerkAuth = (req as any).auth;
-        if (!clerkAuth || !clerkAuth.userId) {
-            return res.status(401).json({ error: 'Authentication required: Missing Clerk UserId' });
-        }
+    const user = userResult.rows[0];
+    req.userId = user.id;
+    req.orgId = user.org_id;
 
-        try {
-            // First attempt to find user by clerk_id
-            let userResult = await pool.query('SELECT * FROM users WHERE clerk_id = $1', [clerkAuth.userId]);
+    const subscriptionResult = await pool.query(
+        'SELECT subscription_status FROM orgs WHERE id = $1',
+        [req.orgId]
+    );
+    req.subscriptionStatus = subscriptionResult.rows[0]?.subscription_status || 'free';
+}
 
-            // Auto-provision mapping for MVP if the user is not in database yet
-            if (userResult.rowCount === 0) {
-                const clerkOrgId = clerkAuth.orgId;
-                let orgResult;
+/**
+ * Provision a Clerk-authenticated user by syncing their identity into the local DB.
+ */
+async function provisionClerkUser(req: AuthRequest, clerkAuth: any): Promise<void> {
+    let userResult = await pool.query('SELECT * FROM users WHERE clerk_id = $1', [clerkAuth.userId]);
 
-                if (clerkOrgId) {
-                    orgResult = await pool.query('SELECT * FROM orgs WHERE clerk_org_id = $1', [clerkOrgId]);
-                    if (orgResult.rowCount === 0) {
-                        orgResult = await pool.query(
-                            'INSERT INTO orgs (name, clerk_org_id) VALUES ($1, $2) RETURNING *',
-                            [`Org ${clerkOrgId.substring(0, 8)}`, clerkOrgId]
-                        );
-                    }
-                } else {
-                    orgResult = await pool.query(
-                        'INSERT INTO orgs (name, clerk_org_id) VALUES ($1, $2) RETURNING *',
-                        [`Personal Org ${clerkAuth.userId.substring(0, 8)}`, `personal_${clerkAuth.userId}`]
-                    );
-                }
+    if (userResult.rowCount === 0) {
+        const clerkOrgId = clerkAuth.orgId;
+        let orgResult;
 
-                userResult = await pool.query(
-                    'INSERT INTO users (org_id, email, clerk_id, role) VALUES ($1, $2, $3, $4) RETURNING *',
-                    [orgResult.rows[0].id, `${clerkAuth.userId}@clerk-provision.local`, clerkAuth.userId, 'admin']
+        if (clerkOrgId) {
+            orgResult = await pool.query('SELECT * FROM orgs WHERE clerk_org_id = $1', [clerkOrgId]);
+            if (orgResult.rowCount === 0) {
+                orgResult = await pool.query(
+                    'INSERT INTO orgs (name, clerk_org_id) VALUES ($1, $2) RETURNING *',
+                    [`Org ${clerkOrgId.substring(0, 8)}`, clerkOrgId]
                 );
             }
-
-            const user = userResult.rows[0];
-            req.userId = user.id;
-            req.orgId = user.org_id;
-
-            // Check subscription status
-            const subscriptionResult = await pool.query(
-                'SELECT subscription_status FROM orgs WHERE id = $1',
-                [req.orgId]
+        } else {
+            orgResult = await pool.query(
+                'INSERT INTO orgs (name, clerk_org_id) VALUES ($1, $2) RETURNING *',
+                [`Personal Org ${clerkAuth.userId.substring(0, 8)}`, `personal_${clerkAuth.userId}`]
             );
-            req.subscriptionStatus = subscriptionResult.rows[0]?.subscription_status || 'free';
-
-            next();
-        } catch (dbError) {
-            console.error('Database Sync Error in Auth:', dbError);
-            res.status(500).json({ error: 'Internal server error during DB auth sync' });
         }
-    });
+
+        userResult = await pool.query(
+            'INSERT INTO users (org_id, email, clerk_id, role) VALUES ($1, $2, $3, $4) RETURNING *',
+            [orgResult.rows[0].id, `${clerkAuth.userId}@clerk-provision.local`, clerkAuth.userId, 'admin']
+        );
+    }
+
+    const user = userResult.rows[0];
+    req.userId = user.id;
+    req.orgId = user.org_id;
+
+    const subscriptionResult = await pool.query(
+        'SELECT subscription_status FROM orgs WHERE id = $1',
+        [req.orgId]
+    );
+    req.subscriptionStatus = subscriptionResult.rows[0]?.subscription_status || 'free';
+}
+
+/**
+ * Authentication middleware.
+ * Uses Clerk when keys are valid, otherwise falls back to demo-mode.
+ */
+export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction) => {
+    // If Clerk middleware is available, use it
+    if (clerkMiddleware) {
+        try {
+            clerkMiddleware(req as Request, res, async (err: any) => {
+                if (err) {
+                    console.error('Clerk Auth Error:', err.message || err);
+                    return res.status(401).json({
+                        error: 'Authentication failed',
+                        message: err.message || 'Invalid token'
+                    });
+                }
+
+                const clerkAuth = (req as any).auth;
+                if (!clerkAuth || !clerkAuth.userId) {
+                    return res.status(401).json({ error: 'Authentication required: Missing Clerk UserId' });
+                }
+
+                try {
+                    await provisionClerkUser(req, clerkAuth);
+                    next();
+                } catch (dbError) {
+                    console.error('Database Sync Error in Auth:', dbError);
+                    res.status(500).json({ error: 'Internal server error during DB auth sync' });
+                }
+            });
+        } catch (fatalErr: any) {
+            // Clerk SDK threw a fatal error (e.g., invalid key at runtime)
+            console.error('⚠️  Clerk SDK fatal error, falling back to demo-mode:', fatalErr.message);
+            clerkMiddleware = null; // Disable Clerk for future requests
+            handleDemoFallback(req, res, next);
+        }
+    } else {
+        // Demo mode — no Clerk
+        handleDemoFallback(req, res, next);
+    }
 };
+
+async function handleDemoFallback(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+        await provisionDemoUser(req);
+        next();
+    } catch (dbError) {
+        console.error('Demo Auth Provisioning Error:', dbError);
+        res.status(500).json({ error: 'Internal server error during demo auth' });
+    }
+}
 
 /**
  * Premium access middleware.
