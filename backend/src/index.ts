@@ -76,6 +76,7 @@ async function initDb() {
                 name VARCHAR(255) NOT NULL UNIQUE,
                 subscription_status VARCHAR(50) DEFAULT 'free',
                 stripe_customer_id VARCHAR(255) UNIQUE,
+                clerk_org_id VARCHAR(255) UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             
@@ -84,6 +85,7 @@ async function initDb() {
                 org_id INT REFERENCES orgs(id),
                 email VARCHAR(255) UNIQUE NOT NULL,
                 name VARCHAR(255),
+                clerk_id VARCHAR(255) UNIQUE,
                 role VARCHAR(50) DEFAULT 'viewer',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
