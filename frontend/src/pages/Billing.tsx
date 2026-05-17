@@ -38,12 +38,12 @@ export default function Billing() {
     return (
         <div className="billing-page app-container">
             <header className="section-header">
-                <h1>Plans & Billing</h1>
-                <p>Manage your AI workforce subscription and usage limits.</p>
+                <h2>Plans & Billing</h2>
+                <p style={{ color: 'var(--text-muted)' }}>Manage your AI workforce subscription and usage limits.</p>
             </header>
 
-            <div className="current-status card">
-                <div className="status-info">
+            <div className="current-status card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="status-info" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <h3>Current Plan: <span className="gradient-text" style={{ textTransform: 'uppercase' }}>{subscription || 'STARTER'}</span></h3>
                     <p>Your organization is currently on the {subscription || 'Starter'} plan.</p>
                 </div>
@@ -96,14 +96,16 @@ export default function Billing() {
             <style>{`
         .pricing-card { text-align: center; display: flex; flex-direction: column; gap: 20px; transition: transform 0.3s; }
         .pricing-card.featured { border: 2px solid var(--accent); transform: scale(1.05); }
-        .pricing-card h2 { font-size: 24px; color: var(--primary); }
-        .price { font-size: 48px; font-weight: 800; }
+        .pricing-card h2 { font-size: 24px; color: var(--primary); margin: 0; }
+        .price { font-size: 48px; font-weight: 800; line-height: 1; margin: 10px 0; }
         .price span { font-size: 16px; color: #6B7280; font-weight: 400; }
-        .pricing-card ul { list-style: none; text-align: left; margin: 20px 0; }
-        .pricing-card ul li { padding: 8px 0; font-size: 14px; color: #4B5563; }
-        .pricing-card ul li:before { content: "✓ "; color: var(--success); font-weight: 800; }
-        .alert-box { padding: 16px; border-radius: 8px; margin-top: 20px; font-size: 14px; }
-        .alert-box.warning { background: rgba(245, 158, 11, 0.1); color: #B45309; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge { background: rgba(0, 250, 154, 0.1); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; text-transform: uppercase; margin-bottom: 8px; }
+        .pricing-card ul { list-style: none; text-align: left; margin: 0; flex-grow: 1; }
+        .pricing-card ul li { padding: 12px 0; font-size: 14px; color: #9CA3AF; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .pricing-card ul li:last-child { border-bottom: none; }
+        .pricing-card ul li:before { content: "✓ "; color: var(--success); font-weight: 800; margin-right: 8px; }
+        .alert-box { padding: 16px; border-radius: 8px; font-size: 14px; }
+        .alert-box.warning { background: rgba(245, 158, 11, 0.1); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.2); }
       `}</style>
         </div>
     );
