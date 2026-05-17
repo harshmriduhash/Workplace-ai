@@ -14,28 +14,29 @@ export default function SimulationRunner() {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const res = await API.get(`/agents/${orgId}`);
+        const res = await API.get(`/agents`);
         setAgents(res.data || []);
       } catch (err) {
         console.error("Failed to fetch agents:", err);
       }
     };
-    if (orgId) fetchAgents();
-  }, [orgId]);
+    fetchAgents();
+  }, [API]);
 
   const fetchSimulations = async () => {
     try {
-      const res = await API.get(`/simulations/${orgId}`);
+      const res = await API.get(`/simulations`);
       setSimulations(res.data || []);
     } catch (err) {
       console.error("Failed to fetch simulations:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    if (orgId) fetchSimulations();
-  }, [orgId]);
+    fetchSimulations();
+  }, [API]);
 
   const handleRunSimulation = async () => {
     if (!selectedAgent) return;

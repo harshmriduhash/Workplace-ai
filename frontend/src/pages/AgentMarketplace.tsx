@@ -36,10 +36,18 @@ export default function AgentMarketplace() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading for UI polish
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchHired = async () => {
+      try {
+        const res = await API.get("/agents");
+        setHired(res.data.map((a: any) => a.name));
+      } catch (err) {
+        console.error("Failed to fetch custom agents", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHired();
+  }, [API]);
 
   const handleHireAgent = async (agent: any) => {
     setHiring(true);

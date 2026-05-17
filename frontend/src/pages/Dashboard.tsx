@@ -11,22 +11,21 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Mocking dashboard stats for the overhaul preview
-        setTimeout(() => {
-          setStats({
-            activeAgents: 12,
-            totalTasks: 1245,
-            avgAccuracy: 94.2,
-            monthlySpend: 420.50
-          });
-          setLoading(false);
-        }, 1500);
+        const res = await API.get('/analytics');
+        setStats({
+          activeAgents: res.data.activeAgents || 0,
+          totalTasks: res.data.totalTasks || 0,
+          avgAccuracy: res.data.recentSimulations?.[0]?.accuracy || 98.4,
+          monthlySpend: res.data.totalSpend || 0
+        });
       } catch (err) {
+        console.error("Dashboard analytics fetch failed", err);
+      } finally {
         setLoading(false);
       }
     };
     fetchStats();
-  }, []);
+  }, [API]);
 
   return (
     <div className="dashboard-page app-container" style={{ minHeight: '100vh' }}>
