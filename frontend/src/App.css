@@ -63,7 +63,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  margin-bottom: 30px;
+  margin: 0 auto 30px auto;
+  max-width: 1280px;
+  width: 100%;
 }
 
 .navbar-brand .logo-text {
@@ -116,6 +118,12 @@ body {
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   gap: 24px;
 }
 
@@ -257,10 +265,19 @@ body {
 
   .navbar {
     padding: 16px 20px;
+    flex-wrap: wrap;
   }
 
   .nav-links {
-    display: none;
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-top: 15px;
+    justify-content: flex-start;
+  }
+
+  .main-content-grid {
+    grid-template-columns: 1fr;
   }
 
   /* Mobile nav needed later */

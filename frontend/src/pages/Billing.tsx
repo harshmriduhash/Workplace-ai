@@ -44,10 +44,10 @@ export default function Billing() {
 
             <div className="current-status card">
                 <div className="status-info">
-                    <h3>Current Plan: <span className="gradient-text" style={{ textTransform: 'uppercase' }}>{subscription}</span></h3>
-                    <p>Your organization is currently on the {subscription} plan.</p>
+                    <h3>Current Plan: <span className="gradient-text" style={{ textTransform: 'uppercase' }}>{subscription || 'STARTER'}</span></h3>
+                    <p>Your organization is currently on the {subscription || 'Starter'} plan.</p>
                 </div>
-                {subscription === 'free' && (
+                {(subscription === 'free' || !subscription) && (
                     <div className="alert-box warning">
                         ⚠️ You are limited to 3 active agents and basic simulations.
                     </div>

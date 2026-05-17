@@ -29,7 +29,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page app-container" style={{ minHeight: '100vh' }}>
       <header className="section-header" style={{ textAlign: 'left', marginBottom: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <h1>Organization Overview</h1>
@@ -63,7 +63,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="main-content-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      <div className="main-content-grid">
         <section className="recent-activity">
           <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3>Recent Agent Activity</h3>
@@ -74,7 +74,7 @@ export default function Dashboard() {
               [1, 2, 3].map(i => <Shimmer key={i} height="80px" borderRadius="12px" />)
             ) : (
               <div className="card glass" style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
-                <img src="/pulse_placeholder.png" style={{ width: '40px', opacity: 0.2, marginBottom: '15px' }} />
+                <svg style={{ width: '40px', height: '40px', opacity: 0.2, marginBottom: '15px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
                 <p>No recent tasks. Deploy an agent to start monitoring activity.</p>
               </div>
             )}
