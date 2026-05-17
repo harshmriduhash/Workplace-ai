@@ -11,18 +11,18 @@ export default function LandingPage({ forceAuthOverlay = false }) {
   const renderNavButtons = () => {
     if (isDemo) {
       return (
-        <button className="btn-small glass" onClick={() => navigate('/dashboard')}>Launch Console (Demo)</button>
+        <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => navigate('/dashboard')}>Launch Console (Demo)</button>
       );
     }
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <SignedIn>
-          <button className="btn-small glass" onClick={() => navigate('/dashboard')}>Console</button>
+          <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => navigate('/dashboard')}>Console</button>
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
-            <button className="btn-small glass">Login</button>
+            <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>Login</button>
           </SignInButton>
         </SignedOut>
       </div>
@@ -177,9 +177,10 @@ export default function LandingPage({ forceAuthOverlay = false }) {
 
         /* Footer Styling */
         .landing-footer { border-top: 1px solid var(--border-glass); background: #000; padding: 60px 40px 20px; margin-top: 60px; }
-        .footer-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 40px; }
+        .footer-grid { max-width: 1280px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px; padding-bottom: 40px; }
+        .footer-brand { flex: 2; min-width: 300px; }
         .footer-brand p { color: var(--text-muted); margin-top: 15px; line-height: 1.6; font-size: 14px; padding-right: 40px; }
-        .footer-links { display: flex; flex-direction: column; gap: 12px; }
+        .footer-links { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 150px; }
         .footer-links h4 { font-size: 14px; font-weight: 700; color: white; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
         .footer-links a { font-size: 14px; color: var(--text-muted); transition: color 0.2s; }
         .footer-links a:hover { color: var(--primary); }
