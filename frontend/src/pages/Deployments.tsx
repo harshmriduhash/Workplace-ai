@@ -33,7 +33,6 @@ export default function Deployments() {
     setDeploying(true);
     try {
       await API.post('/deployments', {
-        org_id: orgId,
         agent_id: parseInt(selectedAgent),
         environment: 'email'
       });

@@ -53,7 +53,6 @@ export default function AgentMarketplace() {
     setHiring(true);
     try {
       await API.post("/agents", {
-        org_id: orgId,
         name: agent.name,
         role: agent.role,
         description: agent.description,

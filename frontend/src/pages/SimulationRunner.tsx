@@ -43,7 +43,6 @@ export default function SimulationRunner() {
     setRunning(true);
     try {
       await API.post("/simulations", {
-        org_id: orgId,
         agent_id: parseInt(selectedAgent),
       });
       await fetchSimulations();
