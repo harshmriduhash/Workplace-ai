@@ -1,10 +1,10 @@
-import { OpenAI } from 'openai';
+import Groq from 'groq-sdk';
 import nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 
-// OpenAI Client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'sk-test-key'
+// Groq Client (OpenAI-compatible API)
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY || ''
 });
 
 // Email Transporter
@@ -30,7 +30,7 @@ if (process.env.SMTP_HOST) {
 }
 
 /**
- * Run real AI simulation using OpenAI
+ * Run real AI simulation using Groq (Llama 3.3 70B)
  */
 export async function runAISimulation(
   agentRole: string,
@@ -51,8 +51,8 @@ For each test case:
 
 Format your response as JSON array with: response, confidence, cost, latency, success`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 2000
@@ -81,7 +81,7 @@ Format your response as JSON array with: response, confidence, cost, latency, su
 }
 
 /**
- * Run agent task using real LLM
+ * Run agent task using Groq LLM
  */
 export async function runAgentTask(
   agentRole: string,
@@ -101,8 +101,8 @@ Respond with:
 
 Keep response concise and actionable.`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.5,
       max_tokens: 500
@@ -113,7 +113,7 @@ Keep response concise and actionable.`;
     return {
       output,
       task_id: uuidv4(),
-      model: 'gpt-4',
+      model: 'llama-3.3-70b-versatile',
       tokens_used: response.usage?.total_tokens || 0
     };
   } catch (err) {
@@ -176,4 +176,5 @@ export function parseAgentResponse(output: string) {
   }
 }
 
-export { openai, emailTransporter };
+export { groq, emailTransporter };
+

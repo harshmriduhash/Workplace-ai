@@ -164,7 +164,7 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok',
     timestamp: new Date(),
     config: {
-      openai: !!process.env.OPENAI_API_KEY,
+      groq: !!process.env.GROQ_API_KEY,
       clerk: !!process.env.CLERK_API_KEY,
       database: 'connected'
     }
