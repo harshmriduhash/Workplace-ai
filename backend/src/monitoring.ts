@@ -37,7 +37,7 @@ export const initSentry = (app: Express) => {
         delete event.request.headers.cookie;
       }
       // Remove sensitive query params
-      if (event.request?.query_string) {
+      if (typeof event.request?.query_string === 'string') {
         const sanitized = event.request.query_string
           .replace(/api_key=[^&]*/gi, "api_key=[REDACTED]")
           .replace(/token=[^&]*/gi, "token=[REDACTED]");
