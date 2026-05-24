@@ -16,7 +16,7 @@ import Billing from "./pages/Billing";
 import { AppNavbar } from "./components/AppNavbar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
-const apiBaseUrl = "http://localhost:3001/api";
+const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || "http://localhost:3001/api";
 const API = axios.create({ baseURL: apiBaseUrl });
 
 export const AppContext = React.createContext<any>({});
@@ -97,26 +97,27 @@ export default function App() {
   const clerkPubKey = (import.meta as any).env?.VITE_CLERK_PUBLISHABLE_KEY;
 
   if (!clerkPubKey || clerkPubKey.includes("REPLACE_WITH")) {
-    return (
-      <AppContext.Provider value={{ orgId: "demo-1", API, isDemo: true }}>
-        <Router>
-          <AppNavbar />
-          <main className="app-container">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/agents" element={<AgentMarketplace />} />
-              <Route path="/simulations" element={<SimulationRunner />} />
-              <Route path="/deployments" element={<Deployments />} />
-              <Route path="/governor" element={<Governor />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="*" element={<Dashboard />} />
-            </Routes>
-          </main>
-        </Router>
-      </AppContext.Provider>
-    );
+  return (
+    <AppContext.Provider value={{ orgId: "demo-1", API, isDemo: true }}>
+      <Router>
+        <AppNavbar />
+        <main className="app-container">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/console" element={<Dashboard />} />
+            <Route path="/agents" element={<AgentMarketplace />} />
+            <Route path="/simulations" element={<SimulationRunner />} />
+            <Route path="/deployments" element={<Deployments />} />
+            <Route path="/governor" element={<Governor />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="*" element={<Dashboard />} />
+          </Routes>
+        </main>
+      </Router>
+    </AppContext.Provider>
+  );
   }
 
   return (
