@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
 import { AppContext } from '../App';
@@ -11,23 +11,49 @@ export default function LandingPage({ forceAuthOverlay = false }) {
   const renderNavButtons = () => {
     if (isDemo) {
       return (
-        <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => navigate('/dashboard')}>Launch Console (Demo)</button>
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{
+            padding: '8px 20px', fontSize: '13px', fontWeight: 700,
+            background: 'rgba(0,229,255,0.1)', color: '#00E5FF',
+            border: '1px solid rgba(0,229,255,0.4)', borderRadius: '8px',
+            cursor: 'pointer', transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,229,255,0.2)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,229,255,0.1)')}
+        >
+          Launch Console →
+        </button>
       );
     }
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <SignedIn>
-          <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => navigate('/dashboard')}>Console</button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '8px 20px', fontSize: '13px', fontWeight: 700,
+              background: 'rgba(0,229,255,0.1)', color: '#00E5FF',
+              border: '1px solid rgba(0,229,255,0.4)', borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >Console</button>
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal" redirectUrl="/dashboard" afterSignInUrl="/dashboard" afterSignUpUrl="/dashboard">
-            <button className="button button-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>Login</button>
+            <button style={{
+              padding: '8px 20px', fontSize: '13px', fontWeight: 700,
+              background: '#00E5FF', color: '#000',
+              border: 'none', borderRadius: '8px', cursor: 'pointer',
+              boxShadow: '0 0 15px rgba(0,229,255,0.3)',
+            }}>Login</button>
           </SignInButton>
         </SignedOut>
       </div>
     );
   };
+
 
   return (
     <div className="landing-page">
